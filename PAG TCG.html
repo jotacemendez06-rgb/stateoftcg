@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STATEOFTCG | Pokémon TCG & Coleccionables</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bgdeep: '#0a0e1a',
+          bgpanel: '#0d1326',
+          grana: '#a50034',
+          granabright: '#dc2626',
+          marino: '#181754',
+          gold: '#f5c542',
+        },
+        fontFamily: {
+          display: ['Rajdhani', 'sans-serif'],
+          body: ['Montserrat', 'sans-serif'],
+        },
+        boxShadow: {
+          'grana-glow': '0 0 20px rgba(165, 0, 52, 0.35)',
+          'marino-glow': '0 0 20px rgba(24, 23, 84, 0.5)',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body {
+    background-color: #0a0e1a;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(165,0,52,0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(24,23,84,0.35) 0%, transparent 45%);
+    background-attachment: fixed;
+  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0d1326; }
+  ::-webkit-scrollbar-thumb { background: #a50034; border-radius: 10px; }
+
+  .stripe-title {
+    background: linear-gradient(90deg, #a50034 0%, #dc2626 45%, #a50034 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(165, 0, 52, 0.25);
+    border-color: #dc2626;
+  }
+
+  .filter-btn.active {
+    background-color: #a50034;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(165,0,52,0.5);
+    border-color: #dc2626;
+  }
+
+  @keyframes pulse-wa {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+  }
+  .wa-pulse { animation: pulse-wa 2.2s infinite; }
+
+  .barca-stripe {
+    background: repeating-linear-gradient(
+      90deg,
+      #a50034 0px,
+      #a50034 40px,
+      #181754 40px,
+      #181754 80px
+    );
+    height: 4px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="font-body text-slate-200 min-h-screen pb-24">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-bgpanel/90 backdrop-blur-md border-b border-marino shadow-marino-glow">
+  <div class="barca-stripe"></div>
+  <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col items-center text-center">
+    <img
+      src="assets/logo.jpeg"
+      alt="Logo STATEOFTCG"
+      class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-grana shadow-grana-glow object-cover mb-2"
+    />
+    <h1 class="font-display text-4xl sm:text-5xl font-extrabold tracking-widest stripe-title uppercase drop-shadow-[0_0_15px_rgba(165,0,52,0.4)]">
+      STATEOFTCG
+    </h1>
+    <p class="text-slate-400 text-xs sm:text-sm mt-1 font-medium tracking-wide">
+      Tu tienda de Pokémon TCG &amp; Coleccionables en Caracas
+    </p>
+  </div>
+  <div class="barca-stripe"></div>
+</header>
+
+<!-- FILTROS Y BUSQUEDA -->
+<section class="max-w-6xl mx-auto px-4 mt-6">
+  <div class="relative mb-4">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Buscar carta o producto..."
+      class="w-full bg-bgpanel border border-marino focus:border-grana focus:ring-2 focus:ring-grana/40 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-500 outline-none transition"
+    />
+    <svg class="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  </div>
+
+  <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="filterBar">
+    <button data-filter="Todos" class="filter-btn active whitespace-nowrap px-4 py-2 rounded-full border border-marino bg-bgpanel text-sm font-semibold transition hover:border-grana">
+      Todos
+    </button>
+    <button data-filter="Booster Bundles" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-marino bg-bgpanel text-sm font-semibold transition hover:border-grana">
+      Booster Bundles
+    </button>
+    <button data-filter="Singles" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-marino bg-bgpanel text-sm font-semibold transition hover:border-grana">
+      Singles (Cartas)
+    </button>
+    <button data-filter="Tins / Sellados" class="filter-btn whitespace-nowrap px-4 py-2 rounded-full border border-marino bg-bgpanel text-sm font-semibold transition hover:border-grana">
+      Tins / Sellados
+    </button>
+  </div>
+</section>
+
+<!-- GRID DE PRODUCTOS -->
+<main class="max-w-6xl mx-auto px-4 mt-6">
+  <p id="resultsCount" class="text-slate-500 text-xs mb-3 font-medium"></p>
+  <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  <div id="emptyState" class="hidden flex-col items-center justify-center text-center py-20">
+    <p class="text-5xl mb-3">🔍</p>
+    <p class="text-slate-400 font-semibold">No se encontraron productos</p>
+    <p class="text-slate-600 text-sm mt-1">Prueba con otra búsqueda o filtro</p>
+  </div>
+</main>
+
+<!-- BOTON FLOTANTE WHATSAPP -->
+<a
+  id="floatingWA"
+  href="#"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="wa-pulse fixed bottom-5 right-5 z-50 flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebd5a] text-white font-bold px-4 py-3 rounded-full shadow-lg transition"
+>
+  <svg class="w-6 h-6" viewBox="0 0 32 32" fill="currentColor"><path d="M16.001 2.667c-7.363 0-13.334 5.97-13.334 13.333 0 2.353.615 4.66 1.784 6.684L2.667 29.333l6.826-1.79a13.27 13.27 0 0 0 6.508 1.657h.006c7.362 0 13.333-5.97 13.333-13.333 0-3.56-1.387-6.906-3.905-9.425a13.24 13.24 0 0 0-9.434-3.775zm0 24.4h-.005a11.05 11.05 0 0 1-5.63-1.54l-.404-.24-4.05 1.062 1.082-3.949-.264-.406a11.02 11.02 0 0 1-1.69-5.867c0-6.106 4.968-11.073 11.078-11.073 2.958 0 5.74 1.153 7.833 3.248a11 11 0 0 1 3.24 7.838c-.002 6.106-4.97 11.073-11.09 11.073zm6.075-8.29c-.333-.167-1.97-.973-2.276-1.083-.306-.11-.528-.166-.75.167-.222.333-.86 1.083-1.055 1.305-.194.222-.389.25-.722.083-.333-.167-1.406-.518-2.68-1.653-.99-.883-1.66-1.975-1.854-2.308-.194-.333-.02-.514.146-.68.15-.15.333-.389.5-.583.166-.194.222-.333.333-.556.11-.222.056-.417-.028-.583-.083-.167-.75-1.807-1.028-2.474-.27-.65-.546-.562-.75-.573l-.639-.012c-.222 0-.583.083-.889.417-.305.333-1.166 1.14-1.166 2.78 0 1.64 1.194 3.226 1.36 3.448.166.222 2.35 3.588 5.694 5.032.796.344 1.417.55 1.9.703.798.254 1.523.218 2.097.132.64-.096 1.97-.805 2.248-1.583.278-.778.278-1.445.194-1.584-.083-.14-.305-.222-.639-.389z"/></svg>
+  <span class="hidden sm:inline text-sm">Escríbenos</span>
+</a>
+
+<!-- TEMPLATE DE TARJETA (usado por JS) -->
+<template id="cardTemplate">
+  <div class="product-card card-hover bg-bgpanel border border-marino rounded-2xl overflow-hidden flex flex-col">
+    <div class="relative">
+      <img class="prod-img w-full h-36 sm:h-44 object-cover bg-[#181754]" src="" alt="">
+      <span class="prod-tag absolute top-2 left-2 bg-grana/90 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-white px-2 py-1 rounded-md shadow-grana-glow"></span>
+    </div>
+    <div class="flex flex-col flex-1 p-3 gap-1.5">
+      <h3 class="prod-name font-display font-bold text-sm sm:text-base leading-tight text-slate-100"></h3>
+      <p class="prod-status text-[11px] sm:text-xs text-slate-400 font-medium"></p>
+      <p class="prod-price font-display text-lg sm:text-xl font-extrabold text-gold mt-auto"></p>
+      <button class="buy-btn mt-1 w-full bg-gradient-to-r from-grana to-granabright hover:brightness-110 text-white text-xs sm:text-sm font-bold py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-grana-glow">
+        <svg class="w-4 h-4" viewBox="0 0 32 32" fill="currentColor"><path d="M16.001 2.667c-7.363 0-13.334 5.97-13.334 13.333 0 2.353.615 4.66 1.784 6.684L2.667 29.333l6.826-1.79a13.27 13.27 0 0 0 6.508 1.657h.006c7.362 0 13.333-5.97 13.333-13.333 0-3.56-1.387-6.906-3.905-9.425a13.24 13.24 0 0 0-9.434-3.775zm0 24.4h-.005a11.05 11.05 0 0 1-5.63-1.54l-.404-.24-4.05 1.062 1.082-3.949-.264-.406a11.02 11.02 0 0 1-1.69-5.867c0-6.106 4.968-11.073 11.078-11.073 2.958 0 5.74 1.153 7.833 3.248a11 11 0 0 1 3.24 7.838c-.002 6.106-4.97 11.073-11.09 11.073z"/></svg>
+        Comprar por WhatsApp
+      </button>
+    </div>
+  </div>
+</template>
+
+<footer class="text-center text-slate-600 text-xs mt-14 pb-6">
+  © <span id="year"></span> STATEOFTCG — Caracas, Venezuela
+</footer>
+
+<script>
+  // ============ CONFIGURACIÓN ============
+  // Reemplaza con tu número real en formato internacional sin '+' ni espacios (ej: 584121234567)
+  const WHATSAPP_NUMBER = "584149128349";
+
+  // ============ DATOS DE PRODUCTOS ============
+  // 👉 PARA CAMBIAR PRECIOS: edita el campo "price" de cada producto (solo el número, sin el símbolo $).
+  // 👉 PARA CAMBIAR NOMBRE, CATEGORÍA, ETIQUETA, ESTADO O IMAGEN: edita el campo correspondiente de cada objeto.
+  // 👉 PARA AGREGAR UN PRODUCTO NUEVO: copia un bloque { ... } completo, pégalo dentro del array (antes del "]")
+  //    y asegúrate de darle un "id" único que no se repita con los demás.
+  // 👉 PARA LA IMAGEN: puedes usar una URL de internet, o subir tu propia foto a la carpeta "assets/"
+  //    (junto a este index.html) y escribir la ruta así: "assets/nombre-de-tu-foto.jpg"
+  const products = [
+    {
+      id: 1,
+      name: "Journey Together Booster Bundle",
+      category: "Booster Bundles",
+      tag: "Booster Bundle",
+      status: "Pack Sellado",
+      price: 40.00,
+      image: "assets/journey-together-bundle.jpeg"
+    },
+    {
+      id: 2,
+      name: "Salamence ex 187/159",
+      category: "Singles",
+      tag: "Special Illustration Rare",
+      status: "Near Mint / Toploader",
+      price: 60.00,
+      image: "https://images.pokemontcg.io/sv9/187_hires.png"
+    },
+    {
+      id: 3,
+      name: "Hop's Zacian ex 176/159",
+      category: "Singles",
+      tag: "Full Art",
+      status: "Near Mint / Toploader",
+      price: 15.00,
+      image: "https://images.pokemontcg.io/sv9/176_hires.png"
+    },
+    {
+      id: 4,
+      name: "Wailord 162/159",
+      category: "Singles",
+      tag: "Illustration Rare",
+      status: "Near Mint / Toploader",
+      price: 12.00,
+      image: "https://images.pokemontcg.io/sv9/162_hires.png"
+    },
+    {
+      id: 5,
+      name: "Furret 168/159",
+      category: "Singles",
+      tag: "Illustration Rare",
+      status: "Near Mint / Toploader",
+      price: 8.00,
+      image: "https://images.pokemontcg.io/sv9/168_hires.png"
+    },
+    {
+      id: 6,
+      name: "Mega Clefable & Gengar Tin Set",
+      category: "Tins / Sellados",
+      tag: "Tin Set",
+      status: "Pack Sellado",
+      price: 65.00,
+      image: "https://images.pokemontcg.io/sv9/logo.png"
+    }
+  ];
+
+  // ============ ESTADO ============
+  let currentFilter = "Todos";
+  let currentSearch = "";
+
+  // ============ ELEMENTOS ============
+  const grid = document.getElementById("productGrid");
+  const emptyState = document.getElementById("emptyState");
+  const resultsCount = document.getElementById("resultsCount");
+  const searchInput = document.getElementById("searchInput");
+  const filterBar = document.getElementById("filterBar");
+  const cardTemplate = document.getElementById("cardTemplate");
+  const floatingWA = document.getElementById("floatingWA");
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Botón flotante: mensaje genérico
+  floatingWA.href = buildWhatsAppLink(
+    `Hola STATEOFTCG, quisiera más información sobre su catálogo.`
+  );
+
+  function buildWhatsAppLink(message) {
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  }
+
+  function formatPrice(price) {
+    return `$${price.toFixed(2)}`;
+  }
+
+  function renderProducts() {
+    const filtered = products.filter(p => {
+      const matchesFilter = currentFilter === "Todos" || p.category === currentFilter;
+      const matchesSearch =
+        p.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+        p.tag.toLowerCase().includes(currentSearch.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
+
+    grid.innerHTML = "";
+
+    if (filtered.length === 0) {
+      emptyState.classList.remove("hidden");
+      emptyState.classList.add("flex");
+      resultsCount.textContent = "";
+      return;
+    } else {
+      emptyState.classList.add("hidden");
+      emptyState.classList.remove("flex");
+    }
+
+    resultsCount.textContent = `${filtered.length} producto${filtered.length !== 1 ? "s" : ""} encontrado${filtered.length !== 1 ? "s" : ""}`;
+
+    filtered.forEach(product => {
+      const node = cardTemplate.content.cloneNode(true);
+
+      const img = node.querySelector(".prod-img");
+      img.src = product.image;
+      img.alt = product.name;
+      img.onerror = () => {
+        img.src = "https://placehold.co/300x300/181754/f5c542?text=STATEOFTCG";
+      };
+
+      node.querySelector(".prod-tag").textContent = product.tag;
+      node.querySelector(".prod-name").textContent = product.name;
+      node.querySelector(".prod-status").textContent = product.status;
+      node.querySelector(".prod-price").textContent = formatPrice(product.price);
+
+      const buyBtn = node.querySelector(".buy-btn");
+      buyBtn.addEventListener("click", () => {
+        const message = `Hola STATEOFTCG, me interesa comprar: ${product.name} (${formatPrice(product.price)})`;
+        window.open(buildWhatsAppLink(message), "_blank");
+      });
+
+      grid.appendChild(node);
+    });
+  }
+
+  // ============ EVENTOS ============
+  searchInput.addEventListener("input", (e) => {
+    currentSearch = e.target.value;
+    renderProducts();
+  });
+
+  filterBar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".filter-btn");
+    if (!btn) return;
+    filterBar.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.filter;
+    renderProducts();
+  });
+
+  // ============ INICIO ============
+  renderProducts();
+</script>
+
+</body>
+</html>
