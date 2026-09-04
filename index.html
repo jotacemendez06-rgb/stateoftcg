@@ -116,6 +116,7 @@
   .prod-img-zoomable { cursor: zoom-in; }
 
   #imageModal.flex { display: flex; }
+  #cartModal.flex { display: flex; }
 </style>
 </head>
 <body class="font-body text-slate-200 min-h-screen pb-24">
@@ -217,6 +218,18 @@
   </div>
 </section>
 
+<!-- BOTON FLOTANTE CARRITO -->
+<button
+  id="cartButton"
+  aria-label="Ver carrito de compras"
+  class="fixed top-4 right-4 z-50 bg-bgpanel border border-marino hover:border-grana text-slate-100 rounded-full w-12 h-12 flex items-center justify-center shadow-marino-glow transition"
+>
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m-10 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"/>
+  </svg>
+  <span id="cartBadge" class="hidden absolute -top-1.5 -right-1.5 bg-grana text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-bgdeep">0</span>
+</button>
+
 <!-- BOTON FLOTANTE WHATSAPP -->
 <a
   id="floatingWA"
@@ -241,10 +254,7 @@
       <h3 class="prod-name font-display font-bold text-sm sm:text-base leading-tight text-slate-100"></h3>
       <p class="prod-status text-[11px] sm:text-xs text-slate-400 font-medium"></p>
       <p class="prod-price font-display text-lg sm:text-xl font-extrabold text-gold mt-auto"></p>
-      <button class="buy-btn mt-1 w-full bg-gradient-to-r from-grana to-granabright hover:brightness-110 text-white text-xs sm:text-sm font-bold py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-grana-glow">
-        <svg class="w-4 h-4" viewBox="0 0 32 32" fill="currentColor"><path d="M16.001 2.667c-7.363 0-13.334 5.97-13.334 13.333 0 2.353.615 4.66 1.784 6.684L2.667 29.333l6.826-1.79a13.27 13.27 0 0 0 6.508 1.657h.006c7.362 0 13.333-5.97 13.333-13.333 0-3.56-1.387-6.906-3.905-9.425a13.24 13.24 0 0 0-9.434-3.775zm0 24.4h-.005a11.05 11.05 0 0 1-5.63-1.54l-.404-.24-4.05 1.062 1.082-3.949-.264-.406a11.02 11.02 0 0 1-1.69-5.867c0-6.106 4.968-11.073 11.078-11.073 2.958 0 5.74 1.153 7.833 3.248a11 11 0 0 1 3.24 7.838c-.002 6.106-4.97 11.073-11.09 11.073z"/></svg>
-        Comprar por WhatsApp
-      </button>
+      <div class="cart-controls mt-1"></div>
     </div>
   </div>
 </template>
@@ -255,6 +265,55 @@
     <button id="modalClose" aria-label="Cerrar" class="absolute -top-11 right-0 text-slate-200 hover:text-grana text-3xl leading-none transition">&times;</button>
     <img id="modalImg" src="" alt="" class="w-full max-h-[75vh] object-contain rounded-xl border-2 border-grana shadow-grana-glow bg-bgpanel">
     <p id="modalCaption" class="text-center text-slate-300 mt-3 text-sm font-semibold"></p>
+  </div>
+</div>
+
+<!-- MODAL CARRITO -->
+<div id="cartModal" class="hidden fixed inset-0 z-[70] items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="relative w-full max-w-lg bg-bgpanel border border-marino rounded-2xl shadow-grana-glow max-h-[92vh] flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-marino flex-shrink-0">
+      <h2 class="font-display text-xl font-extrabold uppercase stripe-title">Tu Carrito</h2>
+      <button id="cartModalClose" aria-label="Cerrar carrito" class="text-slate-400 hover:text-grana text-2xl leading-none transition">&times;</button>
+    </div>
+
+    <div id="cartItemsList" class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3"></div>
+
+    <div id="cartEmptyState" class="hidden flex-col items-center justify-center text-center py-10 px-5">
+      <p class="text-4xl mb-2">🛒</p>
+      <p class="text-slate-400 font-semibold text-sm">Tu carrito está vacío</p>
+      <p class="text-slate-600 text-xs mt-1">Agrega productos desde el catálogo</p>
+    </div>
+
+    <div class="border-t border-marino px-5 py-4 flex-shrink-0">
+      <div class="flex items-center justify-between mb-4">
+        <span class="font-display font-bold text-slate-300 uppercase text-sm tracking-wide">Total</span>
+        <span id="cartTotal" class="font-display text-2xl font-extrabold text-gold">$0.00</span>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <label for="checkoutName" class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Nombre y Apellido</label>
+          <input id="checkoutName" type="text" placeholder="Ej: Ana Pérez"
+            class="w-full mt-1 bg-bgdeep border border-marino focus:border-grana focus:ring-2 focus:ring-grana/40 rounded-lg py-2.5 px-3 text-sm text-slate-200 placeholder-slate-500 outline-none transition" />
+        </div>
+        <div>
+          <label for="checkoutPayment" class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Método de Pago</label>
+          <select id="checkoutPayment"
+            class="w-full mt-1 bg-bgdeep border border-marino focus:border-grana focus:ring-2 focus:ring-grana/40 rounded-lg py-2.5 px-3 text-sm text-slate-200 outline-none transition">
+            <option value="">Selecciona un método</option>
+            <option value="Efectivo USD">Efectivo USD</option>
+            <option value="Transferencia USD">Transferencia USD</option>
+            <option value="USDT / Crypto">USDT / Crypto</option>
+          </select>
+        </div>
+        <p id="checkoutError" class="hidden text-xs text-granabright font-semibold"></p>
+        <button id="checkoutBtn"
+          class="w-full bg-gradient-to-r from-grana to-granabright hover:brightness-110 text-white text-sm font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition shadow-grana-glow">
+          <svg class="w-4 h-4" viewBox="0 0 32 32" fill="currentColor"><path d="M16.001 2.667c-7.363 0-13.334 5.97-13.334 13.333 0 2.353.615 4.66 1.784 6.684L2.667 29.333l6.826-1.79a13.27 13.27 0 0 0 6.508 1.657h.006c7.362 0 13.333-5.97 13.333-13.333 0-3.56-1.387-6.906-3.905-9.425a13.24 13.24 0 0 0-9.434-3.775zm0 24.4h-.005a11.05 11.05 0 0 1-5.63-1.54l-.404-.24-4.05 1.062 1.082-3.949-.264-.406a11.02 11.02 0 0 1-1.69-5.867c0-6.106 4.968-11.073 11.078-11.073 2.958 0 5.74 1.153 7.833 3.248a11 11 0 0 1 3.24 7.838c-.002 6.106-4.97 11.073-11.09 11.073z"/></svg>
+          Completar Pedido por WhatsApp
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -384,6 +443,9 @@
   let currentExpansion = "Todas";
   let currentSearch = "";
 
+  // Carrito: { [productId]: cantidad }
+  let cart = {};
+
   // ============ ELEMENTOS ============
   const grid = document.getElementById("productGrid");
   const emptyState = document.getElementById("emptyState");
@@ -397,6 +459,19 @@
   const modalImg = document.getElementById("modalImg");
   const modalCaption = document.getElementById("modalCaption");
   const modalClose = document.getElementById("modalClose");
+
+  // Carrito
+  const cartButton = document.getElementById("cartButton");
+  const cartBadge = document.getElementById("cartBadge");
+  const cartModal = document.getElementById("cartModal");
+  const cartModalClose = document.getElementById("cartModalClose");
+  const cartItemsList = document.getElementById("cartItemsList");
+  const cartEmptyState = document.getElementById("cartEmptyState");
+  const cartTotalEl = document.getElementById("cartTotal");
+  const checkoutName = document.getElementById("checkoutName");
+  const checkoutPayment = document.getElementById("checkoutPayment");
+  const checkoutError = document.getElementById("checkoutError");
+  const checkoutBtn = document.getElementById("checkoutBtn");
 
   document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -508,21 +583,212 @@
       node.querySelector(".prod-status").textContent = product.status;
       node.querySelector(".prod-price").textContent = formatPrice(product.price);
 
-      const buyBtn = node.querySelector(".buy-btn");
-      if (isSoldOut) {
-        buyBtn.textContent = "Agotado";
-        buyBtn.disabled = true;
-        buyBtn.className = "buy-btn mt-1 w-full bg-slate-700 text-slate-400 text-xs sm:text-sm font-bold py-2.5 rounded-lg cursor-not-allowed";
-      } else {
-        buyBtn.addEventListener("click", () => {
-          const message = `Hola STATEOFTCG, me interesa comprar: ${product.name} (${formatPrice(product.price)})`;
-          window.open(buildWhatsAppLink(message), "_blank");
-        });
-      }
+      const cartControls = node.querySelector(".cart-controls");
+      renderCartControls(cartControls, product, isSoldOut);
 
       grid.appendChild(node);
     });
   }
+
+  // ============ CONTROLES DE CARRITO EN CADA TARJETA ============
+  function renderCartControls(container, product, isSoldOut) {
+    if (isSoldOut) {
+      container.innerHTML = `<button disabled class="w-full bg-slate-700 text-slate-400 text-xs sm:text-sm font-bold py-2.5 rounded-lg cursor-not-allowed">Agotado</button>`;
+      return;
+    }
+
+    const qty = cart[product.id] || 0;
+
+    if (qty === 0) {
+      container.innerHTML = `
+        <button class="add-to-cart-btn w-full bg-gradient-to-r from-grana to-granabright hover:brightness-110 text-white text-xs sm:text-sm font-bold py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-grana-glow">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m-10 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"/></svg>
+          Agregar al Carrito
+        </button>`;
+      container.querySelector(".add-to-cart-btn").addEventListener("click", () => addToCart(product.id));
+    } else {
+      container.innerHTML = `
+        <div class="flex items-center justify-between bg-marino/40 border border-marino rounded-lg overflow-hidden">
+          <button class="qty-minus text-white text-lg font-bold w-10 h-10 flex items-center justify-center hover:bg-grana/30 transition" aria-label="Quitar uno">−</button>
+          <span class="qty-value flex-1 text-center text-sm font-bold text-gold">${qty}</span>
+          <button class="qty-plus text-white text-lg font-bold w-10 h-10 flex items-center justify-center hover:bg-grana/30 transition" aria-label="Agregar uno">+</button>
+        </div>`;
+      container.querySelector(".qty-minus").addEventListener("click", () => decrementCartItem(product.id));
+      container.querySelector(".qty-plus").addEventListener("click", () => incrementCartItem(product.id));
+    }
+  }
+
+  // ============ LÓGICA DEL CARRITO ============
+  function getProductById(id) {
+    return products.find(p => p.id === id);
+  }
+
+  function addToCart(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    onCartChange();
+  }
+
+  function incrementCartItem(id) {
+    cart[id] = (cart[id] || 0) + 1;
+    onCartChange();
+  }
+
+  function decrementCartItem(id) {
+    if (!cart[id]) return;
+    cart[id] -= 1;
+    if (cart[id] <= 0) delete cart[id];
+    onCartChange();
+  }
+
+  function removeFromCart(id) {
+    delete cart[id];
+    onCartChange();
+  }
+
+  function getCartCount() {
+    return Object.values(cart).reduce((sum, q) => sum + q, 0);
+  }
+
+  function getCartTotal() {
+    return Object.entries(cart).reduce((sum, [id, qty]) => {
+      const product = getProductById(Number(id));
+      return sum + (product ? product.price * qty : 0);
+    }, 0);
+  }
+
+  function onCartChange() {
+    updateCartBadge();
+    renderProducts();
+    if (cartModal.classList.contains("flex")) {
+      renderCartItems();
+    }
+  }
+
+  function updateCartBadge() {
+    const count = getCartCount();
+    cartBadge.textContent = count;
+    cartBadge.classList.toggle("hidden", count === 0);
+  }
+
+  // ============ MODAL DEL CARRITO ============
+  function renderCartItems() {
+    const entries = Object.entries(cart);
+    cartItemsList.innerHTML = "";
+
+    if (entries.length === 0) {
+      cartItemsList.classList.add("hidden");
+      cartEmptyState.classList.remove("hidden");
+      cartEmptyState.classList.add("flex");
+    } else {
+      cartItemsList.classList.remove("hidden");
+      cartEmptyState.classList.add("hidden");
+      cartEmptyState.classList.remove("flex");
+
+      entries.forEach(([id, qty]) => {
+        const product = getProductById(Number(id));
+        if (!product) return;
+
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-3 bg-bgdeep/60 border border-marino rounded-xl p-2.5";
+        row.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" class="w-14 h-14 object-cover rounded-lg border border-marino flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-slate-100 truncate">${product.name}</p>
+            <p class="text-xs text-slate-500">${formatPrice(product.price)} c/u</p>
+            <div class="flex items-center gap-2 mt-1.5">
+              <button class="cart-qty-minus w-7 h-7 flex items-center justify-center rounded-md bg-marino/40 border border-marino text-white font-bold hover:bg-grana/30 transition" aria-label="Quitar uno">−</button>
+              <span class="text-sm font-bold text-gold w-5 text-center">${qty}</span>
+              <button class="cart-qty-plus w-7 h-7 flex items-center justify-center rounded-md bg-marino/40 border border-marino text-white font-bold hover:bg-grana/30 transition" aria-label="Agregar uno">+</button>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <span class="text-sm font-bold text-gold">${formatPrice(product.price * qty)}</span>
+            <button class="cart-remove text-slate-500 hover:text-grana transition" aria-label="Eliminar producto">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        `;
+        row.querySelector(".cart-qty-minus").addEventListener("click", () => decrementCartItem(product.id));
+        row.querySelector(".cart-qty-plus").addEventListener("click", () => incrementCartItem(product.id));
+        row.querySelector(".cart-remove").addEventListener("click", () => removeFromCart(product.id));
+        cartItemsList.appendChild(row);
+      });
+    }
+
+    cartTotalEl.textContent = formatPrice(getCartTotal());
+  }
+
+  function openCartModal() {
+    hideCheckoutError();
+    renderCartItems();
+    cartModal.classList.remove("hidden");
+    cartModal.classList.add("flex");
+  }
+
+  function closeCartModal() {
+    cartModal.classList.add("hidden");
+    cartModal.classList.remove("flex");
+  }
+
+  function showCheckoutError(msg) {
+    checkoutError.textContent = msg;
+    checkoutError.classList.remove("hidden");
+  }
+
+  function hideCheckoutError() {
+    checkoutError.classList.add("hidden");
+  }
+
+  cartButton.addEventListener("click", openCartModal);
+  cartModalClose.addEventListener("click", closeCartModal);
+  cartModal.addEventListener("click", (e) => {
+    if (e.target === cartModal) closeCartModal();
+  });
+
+  // ============ CHECKOUT / MENSAJE DE WHATSAPP ============
+  checkoutBtn.addEventListener("click", () => {
+    const name = checkoutName.value.trim();
+    const payment = checkoutPayment.value;
+    const entries = Object.entries(cart);
+
+    if (entries.length === 0) {
+      showCheckoutError("Tu carrito está vacío. Agrega al menos un producto.");
+      return;
+    }
+    if (!name) {
+      showCheckoutError("Por favor ingresa tu nombre y apellido.");
+      checkoutName.focus();
+      return;
+    }
+    if (!payment) {
+      showCheckoutError("Selecciona un método de pago.");
+      checkoutPayment.focus();
+      return;
+    }
+
+    hideCheckoutError();
+
+    const lines = entries.map(([id, qty]) => {
+      const product = getProductById(Number(id));
+      const subtotal = product.price * qty;
+      return `- ${qty}x ${product.name} - ${formatPrice(subtotal)}`;
+    });
+
+    const message =
+`Hola STATEOFTCG, me gustaría realizar el siguiente pedido:
+
+📋 Detalle del Pedido:
+${lines.join("\n")}
+
+💰 Total a Pagar: ${formatPrice(getCartTotal())} USD
+💳 Método de Pago: ${payment}
+👤 Cliente: ${name}
+
+Quedo a la espera para coordinar la entrega. ¡Gracias!`;
+
+    window.open(buildWhatsAppLink(message), "_blank");
+    closeCartModal();
+  });
 
   // ============ MODAL DE ZOOM ============
   function openImageModal(product) {
@@ -543,7 +809,10 @@
     if (e.target === imageModal) closeImageModal();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeImageModal();
+    if (e.key === "Escape") {
+      closeImageModal();
+      closeCartModal();
+    }
   });
 
   // ============ EVENTOS ============
@@ -553,9 +822,11 @@
   });
 
   // ============ INICIO ============
+  updateCartBadge();
   renderProducts();
 </script>
 
 </body>
 </html>
+
 
