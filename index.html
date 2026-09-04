@@ -93,6 +93,26 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+  .scroll-fade { position: relative; }
+  .scroll-fade::before,
+  .scroll-fade::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .scroll-fade::before {
+    left: 0;
+    background: linear-gradient(90deg, #0a0e1a 0%, rgba(10,14,26,0) 100%);
+  }
+  .scroll-fade::after {
+    right: 0;
+    background: linear-gradient(270deg, #0a0e1a 0%, rgba(10,14,26,0) 100%);
+  }
+
   .prod-img-zoomable { cursor: zoom-in; }
 
   #imageModal.flex { display: flex; }
@@ -146,10 +166,14 @@
   </div>
 
   <p class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 mt-3">Categoría</p>
-  <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="filterBar"></div>
+  <div class="scroll-fade">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="filterBar"></div>
+  </div>
 
   <p class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 mt-3">Expansión</p>
-  <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="expansionBar"></div>
+  <div class="scroll-fade">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="expansionBar"></div>
+  </div>
 </section>
 
 <!-- GRID DE PRODUCTOS -->
@@ -411,7 +435,7 @@
     options.forEach(value => {
       const btn = document.createElement("button");
       btn.textContent = value;
-      btn.className = `filter-chip ${activeClass} whitespace-nowrap px-4 py-2 rounded-full border border-marino bg-bgpanel text-sm font-semibold transition hover:border-grana` + (value === currentValue ? ` ${activeClass}` : "");
+      btn.className = `filter-chip ${activeClass} whitespace-nowrap px-3 py-1.5 rounded-full border border-marino bg-bgpanel text-xs font-semibold transition hover:border-grana` + (value === currentValue ? ` ${activeClass}` : "");
       btn.addEventListener("click", () => {
         onSelect(value);
         container.querySelectorAll(".filter-chip").forEach(b => b.classList.remove(activeClass));
@@ -534,3 +558,4 @@
 
 </body>
 </html>
+
