@@ -101,7 +101,7 @@
     top: 0;
     bottom: 0;
     width: 28px;
-    z-index: 10;
+    z-index: 0;
     pointer-events: none;
   }
   .scroll-fade::before {
@@ -504,19 +504,24 @@
   }
 
   // ============ GENERAR BARRAS DE FILTRO DINÁMICAS ============
-  function buildFilterBar(container, values, allLabel, currentValue, activeClass, onSelect) {
+  // Los botones solo se generan aquí con sus data-attributes.
+  // El manejo de clics vive en UN SOLO listener delegado en document (ver más abajo),
+  // así que aunque el contenedor se vuelva a pintar, los clics siguen funcionando siempre.
+  function buildFilterBar(container, values, allLabel, currentValue, groupName) {
     container.innerHTML = "";
     const options = [allLabel, ...values];
+    const activeTokens = groupName === "category" ? ["filter-btn", "active"] : ["expansion-btn", "active"];
+
     options.forEach(value => {
       const btn = document.createElement("button");
+      btn.type = "button";
       btn.textContent = value;
-      btn.className = `filter-chip ${activeClass} whitespace-nowrap px-3 py-1.5 rounded-full border border-marino bg-bgpanel text-xs font-semibold transition hover:border-grana` + (value === currentValue ? ` ${activeClass}` : "");
-      btn.addEventListener("click", () => {
-        onSelect(value);
-        container.querySelectorAll(".filter-chip").forEach(b => b.classList.remove(activeClass));
-        btn.classList.add(activeClass);
-        renderProducts();
-      });
+      btn.dataset.group = groupName;
+      btn.dataset.value = value;
+      btn.className = "filter-chip relative z-20 cursor-pointer pointer-events-auto whitespace-nowrap px-3 py-1.5 rounded-full border border-marino bg-bgpanel text-xs font-semibold transition hover:border-grana";
+      if (value === currentValue) {
+        btn.classList.add(...activeTokens);
+      }
       container.appendChild(btn);
     });
   }
@@ -524,8 +529,32 @@
   const categories = [...new Set(products.map(p => p.category))];
   const expansions = [...new Set(products.map(p => p.expansion))];
 
-  buildFilterBar(filterBar, categories, "Todos", currentCategory, "filter-btn active", (val) => { currentCategory = val; });
-  buildFilterBar(expansionBar, expansions, "Todas", currentExpansion, "expansion-btn active", (val) => { currentExpansion = val; });
+  buildFilterBar(filterBar, categories, "Todos", currentCategory, "category");
+  buildFilterBar(expansionBar, expansions, "Todas", currentExpansion, "expansion");
+
+  // ============ DELEGACIÓN DE EVENTOS PARA LOS FILTROS ============
+  // Un único listener en document: funciona sin importar cuántas veces
+  // se reconstruya el contenido de #filterBar / #expansionBar.
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".filter-chip");
+    if (!btn) return;
+
+    const group = btn.dataset.group;
+    const value = btn.dataset.value;
+    const container = group === "category" ? filterBar : expansionBar;
+    const activeTokens = group === "category" ? ["filter-btn", "active"] : ["expansion-btn", "active"];
+
+    if (group === "category") {
+      currentCategory = value;
+    } else {
+      currentExpansion = value;
+    }
+
+    container.querySelectorAll(".filter-chip").forEach(b => b.classList.remove(...activeTokens));
+    btn.classList.add(...activeTokens);
+
+    renderProducts();
+  });
 
   // ============ RENDER ============
   function renderProducts() {
